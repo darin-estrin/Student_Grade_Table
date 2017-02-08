@@ -60,7 +60,11 @@ function calculateAverage(){
   for (var i = 0; i < studentArray.length; i++){
     total += studentArray[i].grade;
   }
-  return Math.round(total / studentArray.length);
+  if (total <= 0){
+    return 0;
+  } else {
+    return Math.round(total / studentArray.length);
+  }
 }
 /**
  * updateData - centralized function to update the average and call student list update
