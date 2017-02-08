@@ -23,8 +23,6 @@
    if(isNaN(parseInt(grade.val()))){
      return;
    }
-   console.log(parseInt(grade.val()));
-  $('.student-list-container h1').text('');
   addStudent();
   clearAddStudentForm();
   updateData();
@@ -68,6 +66,7 @@ function calculateAverage(){
  * updateData - centralized function to update the average and call student list update
  */
 function updateData(){
+  $('.student-list-container h1').text('');
   $('.avgGrade').text('');
   $('tbody tr').remove();
   var average = calculateAverage();
@@ -109,7 +108,24 @@ function removeStudent(element){
   studentIndex = parseInt(studentIndex[0].attributes[0].value);
   studentArray.splice(studentIndex, 1);
   updateData();
-  console.log(studentIndex);
+}
+
+function getData(){
+  $.ajax({
+    dataType: "json",
+    data: {
+     api_key: "9HsjbCyrZn"
+   },
+   url: "http://s-apis.learningfuze.com/sgt/get",
+   type: "post",
+   success: function(response){
+     console.log(response);
+     for (var i = 0; i < response.data.length; i++){
+       studentArray.push(response.data[i]);
+     }
+     updateData();
+   }
+ });
 }
 /**
  * Listen for the document to load and reset the data to the initial state
