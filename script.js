@@ -23,7 +23,8 @@
    if(isNaN(parseInt(grade.val()))){
      return;
    }
-  addStudent();
+   // Replaced addStudent with addStudentToDB()
+  addStudentToDB();
   clearAddStudentForm();
   updateData();
   $('#studentName').focus();
@@ -39,9 +40,44 @@ function cancelClicked(){
  *
  * @return undefined
  */
-function addStudent(){
-  studentArray.push({name: student.val(), course: studentCourse.val(), grade: parseInt(grade.val())});
+function addStudent(studentData){
+  studentArray.push({name: studentData.nameInput, course: studentData.courseInput, grade: studentData.gradeInput, studentIndicator: studentData.idOutput});
   return;
+}
+/**
+ * addStudentToDB() - ajax call to post new student information and return new id for DOM creation
+ */
+function addStudentToDB(){
+  var form = new FormData();
+  form.append('api_key', '9HsjbCyrZn');
+  form.append("name", student.val());
+  form.append("course", studentCourse.val());
+  form.append("grade", grade.val());
+  // Local studentData object created to store student information while waiting for new id to be returned
+  var studentData = {
+    nameInput: student.val(),
+    gradeInput: grade.val(),
+    courseInput: studentCourse.val(),
+    idOutput: null
+  };
+
+  $.ajax({
+    // async: true,
+    method: 'post',
+    url: 'http://s-apis.learningfuze.com/sgt/create',
+    processData: false,
+    contentType: false,
+    mimeType: 'multipart/form-data',
+    data: form,
+    success: function(response){
+      console.log(response);
+      // Moved addStudent and called it when ajax returns a success with the new id
+      studentData.idOutput = parseInt(response.replace(/[^0-9]/g,''));
+      // idOutput will be inputted into addStudent with the object as the parameter
+      addStudent(studentData);
+    }
+  });
+
 }
 /**
  * clearAddStudentForm - clears out the form values based on inputIds variable
@@ -92,7 +128,7 @@ function updateStudentList(){
  * @param studentObj
  */
 function addStudentToDom(studentObj){
-  $('tbody').append('<tr studentID="' + studentObj.studentID + '"><td>' + studentObj.name + '</td><td>' + studentObj.course + '</td><td>' + studentObj.grade + '</td><td><button class="btn btn-danger">Delete</button</td></tr>');
+  $('tbody').append('<tr studentID="' + studentObj.studentID + '"><td>' + studentObj.name + '</td><td>' + studentObj.course + '</td><td>' + studentObj.grade + '</td><td><button class="btn btn-danger">Delete</button></td></tr>');
 }
 /**
  * reset - resets the application to initial state. Global variables reset, DOM get reset to initial load state
@@ -135,6 +171,8 @@ function getData(){
  * Listen for the document to load and reset the data to the initial state
  */
 $(document).ready(function(){
+  // Retrieved data at the start of page load
+  getData();
   $('#studentGrade').on('keyup', function(e){
     if(e.keyCode === 13 || e.which === 13){
       addClicked();
