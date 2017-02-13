@@ -25,8 +25,8 @@
    }
    // Replaced addStudent with addStudentToDB()
   addStudentToDB();
-  clearAddStudentForm();
-  updateData();
+  // clearAddStudentForm();
+  // updateData();
   $('#studentName').focus();
  }
 /**
@@ -75,9 +75,27 @@ function addStudentToDB(){
       studentData.idOutput = parseInt(response.replace(/[^0-9]/g,''));
       // idOutput will be inputted into addStudent with the object as the parameter
       addStudent(studentData);
+      clearAddStudentForm();
+      updateData();
     }
   });
 
+}
+/**
+* removeStudentFromDB removes a student from the database
+**/
+function removeStudentFromDB(id){
+  $.ajax({
+    method: 'post',
+    url: 'http://s-apis.learningfuze.com/sgt/delete',
+    data: {
+      api_key: '9HsjbCyrZn',
+      student_id: id
+    },
+    success: function(response){
+      console.log(response);
+    }
+  });
 }
 /**
  * clearAddStudentForm - clears out the form values based on inputIds variable
@@ -128,7 +146,7 @@ function updateStudentList(){
  * @param studentObj
  */
 function addStudentToDom(studentObj){
-  $('tbody').append('<tr studentID="' + studentObj.studentID + '"><td>' + studentObj.name + '</td><td>' + studentObj.course + '</td><td>' + studentObj.grade + '</td><td><button class="btn btn-danger">Delete</button></td></tr>');
+  $('tbody').append('<tr studentID="' + studentObj.studentID + '" id="' + studentObj.id + '"><td>' + studentObj.name + '</td><td>' + studentObj.course + '</td><td>' + studentObj.grade + '</td><td><button class="btn btn-danger">Delete</button></td></tr>');
 }
 /**
  * reset - resets the application to initial state. Global variables reset, DOM get reset to initial load state
@@ -145,8 +163,10 @@ function reset(){
 
 function removeStudent(element){
   var studentIndex = $(element).parents('tr');
+  var studentId = parseInt(studentIndex[0].id);
   studentIndex = parseInt(studentIndex[0].attributes[0].value);
   studentArray.splice(studentIndex, 1);
+  removeStudentFromDB(studentId);
   updateData();
 }
 
