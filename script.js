@@ -1,108 +1,45 @@
-/**
- * Define all global variables here
- */
-  var studentArray = [];
-  var student = $('#studentName');
-  var grade = $('#studentGrade');
-  var studentCourse = $('#course');
-  /**
- * student_array - global array to hold student objects
- * @type {Array}
- */
-/**
- * inputIds - id's of the elements that are used to add students
- * @type {string[]}
- */
-/**
- * addClicked - Event Handler when user clicks the add button
- */
- function addClicked(){
-  $('.student-list-container h1').text('');
-  addStudent();
-  clearAddStudentForm();
-  updateData();
-  $('#studentName').focus();
- }
-/**
- * cancelClicked - Event Handler when user clicks the cancel button, should clear out student form
- */
-function cancelClicked(){
-  clearAddStudentForm();
-}
-/**
- * addStudent - creates a student objects based on input fields in the form and adds the object to global student array
- *
- * @return undefined
- */
-function addStudent(){
-  studentArray.push({name: student.val(), course: studentCourse.val(), grade: parseInt(grade.val())});
-  return undefined;
-}
-/**
- * clearAddStudentForm - clears out the form values based on inputIds variable
- */
-function clearAddStudentForm(){
-  $('#studentName').val('');
-  $('#course').val('');
-  $('#studentGrade').val('');
-}
-/**
- * calculateAverage - loop through the global student array and calculate average grade and return that value
- * @returns {number}
- */
-function calculateAverage(){
-  var total = 0;
-  for (var i = 0; i < studentArray.length; i++){
-    total += studentArray[i].grade;
-  }
-  return Math.round(total / studentArray.length);
-}
-/**
- * updateData - centralized function to update the average and call student list update
- */
-function updateData(){
-  $('.avgGrade').text('');
-  $('tbody').remove('tr');
-  var average = calculateAverage();
-  updateStudentList();
-  $('.avgGrade').text(average);
-}
-/**
- * updateStudentList - loops through global student array and appends each objects data into the student-list-container > list-body
- */
-function updateStudentList(){
-  var i = studentArray.length-1;
-  addStudentToDom(studentArray[i]);
-}
-/**
- * addStudentToDom - take in a student object, create html elements from the values and then append the elements
- * into the .student_list tbody
- * @param studentObj
- */
-function addStudentToDom(studentObj){
-    $('tbody').append('<tr><td>' + studentObj.name + '</td><td>' + studentObj.course + '</td><td>' + studentObj.grade + '</td><td><button class="btn btn-danger">Delete</button</td></tr>');
-}
-/**
- * reset - resets the application to initial state. Global variables reset, DOM get reset to initial load state
- */
-function reset(){
-  studentArray = [];
-  student = $('#studentName');
-  grade = $('#studentGrade');
-  studentCourse = $('#course');
-  $('.avgGrade').text('');
-  $('.student-list-container').append('<h1>User Info Unavailbe</h1>');
-  $('tbody tr').remove();
-}
+var app = angular.module("sgt",[]);
 
-/**
- * Listen for the document to load and reset the data to the initial state
- */
-$(document).ready(function(){
-  $('#studentGrade').on('keyup', function(e){
-    if(e.keyCode === 13 || e.which === 13){
-      addClicked();
+app.controller('sgtController', function(){
+  this.student = {};
+  this.students = [];
+
+  this.addStudent = function(){
+    this.student.grade = parseInt(this.student.grade);
+    if(isNaN(this.student.grade)){
+      alert("Please enter a number for grade");
+      return false;
+    } else if (this.student.grade < 0 || this.student.grade >= 100){
+      alert('Pleas enter a number between 0 and 100 for grade');
+      return false;
     }
-  });
-  reset();
+    this.updateData();
+    this.students.push(this.student);
+    this.student = {};
+  };
+
+  this.updateData = function(){
+    for(var i = 0; i < this.students.lenght; i++){
+      this.students[i].student.id = i;
+    }
+  };
+
+  this.average = function(){
+    this.avgGrade = 0;
+    for (var i = 0; i < this.students.length; i++){
+      this.avgGrade += this.students[i].student.grade;
+    }
+    return this.avgGrade / this.students.length;
+  };
+
+  this.clear = function(){
+    this.student = {};
+  };
+
+  this.deleteStudent = function(){
+    $("tbody").on("click", ".btn-danger", function(){
+      console.log($(this).parents('tr'));
+    });
+  };
+
 });
